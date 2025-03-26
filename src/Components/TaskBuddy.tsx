@@ -156,7 +156,7 @@ function TaskBuddy() {
     const [inProgressCollapsed, setInProgressCollapsed] = useState(false);
     const [completedCollapsed, setCompletedCollapsed] = useState(false);
 
-    const [categoryFilter, setCategoryFilter] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const [dueDateFilter, setDueDateFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [openAccordion, setOpenAccorion] = useState('');
@@ -182,18 +182,27 @@ function TaskBuddy() {
 
     const [currentView, setCurrentView] = useState<'list' | 'board'>('list');
 
+    
+
     useEffect(() => {
         filterTasks();
-    }, [])
-
+    }, [categoryFilter]);
+    
     const filterTasks = (data = tasks) => {
+        let filteredTasks = data;
+    
+        // Check if the category filter is not 'All'
+        if (categoryFilter !== 'All') {
+            filteredTasks = filteredTasks.filter(task => task.category === categoryFilter);
+        }
+    
+        // Set the task list based on the filtered tasks
         setTaskList({
-            ...taskList, 'todo': data.filter(task => task.status === 'TO-DO'),
-            'in_progress': data.filter(task => task.status === 'IN-PROGRESS'),
-            'completed': data.filter(task => task.status === 'COMPLETED')
+            todo: filteredTasks.filter(task => task.status === 'TO-DO'),
+            in_progress: filteredTasks.filter(task => task.status === 'IN-PROGRESS'),
+            completed: filteredTasks.filter(task => task.status === 'COMPLETED')
         });
-        console.log("re render")
-    }
+    };
 
 
     const handleOpenCreateTaskModal = (taskId?: string) => {
@@ -371,7 +380,7 @@ function TaskBuddy() {
     function handleFooterStatusUpdateClick(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
         throw new Error('Function not implemented.');
     }
-
+    const filterCategories = categoryFilter === 'all' ? tasks : tasks.filter(task => task.category === categoryFilter);
     return (
         <Box sx={{
             padding: { xs: '10px', sm: '15px', md: '20px' },
@@ -461,7 +470,7 @@ function TaskBuddy() {
                                 </span>
                             }
                         >
-                            <MenuItem value="ALL">All</MenuItem>
+                            <MenuItem value="All">All</MenuItem>
                             <MenuItem value="Work">Work</MenuItem>
                             <MenuItem value="Personal">Personal</MenuItem>
                         </Select>
@@ -603,7 +612,7 @@ function TaskBuddy() {
 
 
 
-                            {taskList?.todo?.length > 0 && <Paper sx={{ mb: 2, overflow: 'hidden', borderRadius: '8px', width: '100%', boxShadow: 'none' }}>
+                            { taskList?.todo?.length > 0 && <Paper sx={{ mb: 2, overflow: 'hidden', borderRadius: '8px', width: '100%', boxShadow: 'none' }}>
 
                                 <Box
                                     sx={{
