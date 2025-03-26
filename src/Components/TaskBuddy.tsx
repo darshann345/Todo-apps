@@ -182,7 +182,6 @@ function TaskBuddy() {
 
     const [currentView, setCurrentView] = useState<'list' | 'board'>('list');
 
-    
 
     useEffect(() => {
         filterTasks();
@@ -191,12 +190,11 @@ function TaskBuddy() {
     const filterTasks = (data = tasks) => {
         let filteredTasks = data;
     
-        // Check if the category filter is not 'All'
         if (categoryFilter !== 'All') {
             filteredTasks = filteredTasks.filter(task => task.category === categoryFilter);
         }
+        
     
-        // Set the task list based on the filtered tasks
         setTaskList({
             todo: filteredTasks.filter(task => task.status === 'TO-DO'),
             in_progress: filteredTasks.filter(task => task.status === 'IN-PROGRESS'),
@@ -303,6 +301,7 @@ function TaskBuddy() {
         console.log("Clicked Task ID:", taskId); 
         setSelectedTaskId(taskId);
         setStatusAnchorEl(event.currentTarget); 
+        
     };
 
     const handleStatusMenuClose = () => {
@@ -323,25 +322,58 @@ function TaskBuddy() {
     };
 
     const handleBulkStatusChange = (newStatus: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED') => {
-        console.log("Selected Task ID:", selectedTaskId);
-        console.log("Current Tasks:", tasks);
+        const updatedTasks = tasks.map(task => {
+            if (selectedTasks.includes(task.id)) {
+                return { ...task, status: newStatus, completed: newStatus === 'COMPLETED' };
+            }
+            console.log(newStatus)
+            return task;
+        });
         
-        if (selectedTaskId) {
-            const updatedTasks = tasks.map(task =>
-                task.id === selectedTaskId
-                    ? { ...task, status: newStatus, completed: newStatus === 'COMPLETED' }
-                    : task
-            );
-            setTasks(updatedTasks);
-            console.log("Updated Tasks:", updatedTasks);
-            setSelectedTaskId(null);
-            handleStatusMenuClose();
-        }
+        setTasks(updatedTasks);
+        console.log(updatedTasks)
+        setSelectedTasks([]); // Clear selection after updating
+        handleStatusMenuClose(); // Close the status menu
     };
     const filteredTasks = tasks.filter(task =>
         task.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // const renderStatusChip = (status: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED', taskId: string) => {
+    //     let color = '';
+    //     switch (status) {
+    //         case 'TO-DO':
+    //             color = '#f0f0f0';
+    //             break;
+    //         case 'IN-PROGRESS':
+    //             color = '#e6f7ff';
+    //             break;
+    //         case 'COMPLETED':
+    //             color = '#f0f0f0';
+    //             break;
+    //     }
+    //     return (
+    //         <Box
+    //             sx={{
+    //                 bgcolor: color,
+    //                 px: 1,
+    //                 py: 0.5,
+    //                 borderRadius: '4px',
+    //                 fontSize: '0.75rem',
+    //                 display: 'inline-flex',
+    //                 alignItems: 'center',
+    //                 cursor: 'pointer',
+    //                 '&:hover': {
+    //                     bgcolor: theme.palette.action.hover
+    //                 }
+    //             }}
+    //             onClick={(e) => handleStatusClick(e, taskId)} // Ensure this is correct
+    //         >
+    //             {status}
+    //             <ArrowDropDownIcon fontSize="small" />
+    //         </Box>
+    //     );
+    // };
     const renderStatusChip = (status: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED', taskId: string) => {
         let color = '';
         switch (status) {
@@ -349,10 +381,10 @@ function TaskBuddy() {
                 color = '#f0f0f0';
                 break;
             case 'IN-PROGRESS':
-                color = '#e6f7ff';
+                color = '#f0f0f0';
                 break;
             case 'COMPLETED':
-                color = '#f0f0f0';
+                color = '#f0f0f0'; // Change color for completed tasks
                 break;
         }
         return (
@@ -476,18 +508,16 @@ function TaskBuddy() {
                         </Select>
                     </FormControl>
                     <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-                        <InputLabel>Due On</InputLabel>
-                        <Select
-                            value={categoryFilter}
-                            label="Category"
-                            endAdornment={
-                                <span className="material-icons" style={{ fontSize: '1rem' }}>
-                                </span>
-                            }
-                        >
-
-                        </Select>
-                    </FormControl>
+        <TextField
+            label="Due Date"
+            type="date"
+            value={dueDateFilter}
+            onChange={(e) => setDueDateFilter(e.target.value)}
+            InputLabelProps={{
+                shrink: true,
+            }}
+        />
+    </FormControl>
 
 
                 </Stack>
