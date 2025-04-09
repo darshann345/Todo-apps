@@ -167,7 +167,7 @@ function TaskBuddy() {
     const [newTaskCategory, setNewTaskCategory] = useState<'Work' | 'Personal'>('Work');
     const [newTaskDueDate, setNewTaskDueDate] = useState('');
     const [newTaskStatus, setNewTaskStatus] = useState<'TO-DO' | 'IN-PROGRESS' | 'COMPLETED'>('TO-DO');
-    const [editingTaskId, setEditingTaskId] = useState<string | null>(null); // Track the task being edited
+    const [editingTaskId, setEditingTaskId] = useState<string | null>(null); 
 
     const [statusAnchorEl, setStatusAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -273,6 +273,7 @@ function TaskBuddy() {
     const handleSearch = (term: string) => {
         setSearchTerm(term);
         filterTasks(tasks.filter(item => item.name.toLowerCase().includes(term.toLowerCase())));
+        console.log("searching")
     };
 
     const handleTaskCheckboxChange = (taskId: string) => {
@@ -289,20 +290,22 @@ function TaskBuddy() {
     };
 
     const handleDeleteTask = (taskId, event) => {
+
         const updatedTasks = tasks.filter(task => task.id !== taskId);
 
         setTasks(updatedTasks);
+        
         setOptionsAnchorEl(null)
         filterTasks(updatedTasks);
 
 
     };
+   
     const handleStatusClick = (event: React.MouseEvent<HTMLElement>, taskId: string) => {
-        console.log("Clicked Task ID:", taskId); 
         setSelectedTaskId(taskId);
-        setStatusAnchorEl(event.currentTarget); 
-        
+        setStatusAnchorEl(event.currentTarget);
     };
+    
 
     const handleStatusMenuClose = () => {
         setStatusAnchorEl(null);
@@ -321,20 +324,25 @@ function TaskBuddy() {
         setSelectedTaskForOptions(null);
     };
 
-    const handleBulkStatusChange = (newStatus: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED') => {
+    const handleStatusChange = (newStatus: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED') => {
         const updatedTasks = tasks.map(task => {
-            if (selectedTasks.includes(task.id)) {
-                return { ...task, status: newStatus, completed: newStatus === 'COMPLETED' };
+            if (selectedTaskId && task.id === selectedTaskId) {
+                return { ...task, status: newStatus };
             }
-            console.log(newStatus)
+            else if (selectedTasks.length > 0 && selectedTasks.includes(task.id)) {
+                return { ...task, status: newStatus };
+            }
             return task;
         });
         
         setTasks(updatedTasks);
-        console.log(updatedTasks)
-        setSelectedTasks([]); // Clear selection after updating
-        handleStatusMenuClose(); // Close the status menu
+        filterTasks(updatedTasks);
+        
+        setSelectedTaskId(null);
+        setSelectedTasks([]);
+        setStatusAnchorEl(null);
     };
+    
     const filteredTasks = tasks.filter(task =>
         task.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -374,7 +382,8 @@ function TaskBuddy() {
     //         </Box>
     //     );
     // };
-    const renderStatusChip = (status: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED', taskId: string) => {
+    const renderStatusChip = (status: 'TO-DO' | 'IN-PROGRESS' | 'COMPLETED', taskId: string)=> {
+        console.log(taskId)
         let color = '';
         switch (status) {
             case 'TO-DO':
@@ -384,7 +393,7 @@ function TaskBuddy() {
                 color = '#f0f0f0';
                 break;
             case 'COMPLETED':
-                color = '#f0f0f0'; // Change color for completed tasks
+                color = '#f0f0f0'; 
                 break;
         }
         return (
@@ -402,7 +411,7 @@ function TaskBuddy() {
                         bgcolor: theme.palette.action.hover
                     }
                 }}
-                onClick={(e) => handleStatusClick(e, taskId)} // Ensure this is correct
+                onClick={(e) => handleStatusClick(e, taskId)} 
             >
                 {status}
                 <ArrowDropDownIcon fontSize="small" />
@@ -1119,7 +1128,7 @@ function TaskBuddy() {
                     horizontal: 'left',
                 }}
             >
-                <MenuItem onClick={() => handleBulkStatusChange('TO-DO')}>
+                <MenuItem onClick={() => handleStatusChange("TO-DO")}>
                     <Box sx={{
                         bgcolor: '#f0f0f0',
                         px: 1,
@@ -1132,7 +1141,7 @@ function TaskBuddy() {
                         TO-DO
                     </Box>
                 </MenuItem>
-                <MenuItem onClick={() => handleBulkStatusChange('IN-PROGRESS')}>
+                <MenuItem onClick={() => handleStatusChange("IN-PROGRESS")}>
                     <Box sx={{
                         bgcolor: '#e6f7ff',
                         px: 1,
@@ -1145,7 +1154,7 @@ function TaskBuddy() {
                         IN-PROGRESS
                     </Box>
                 </MenuItem>
-                <MenuItem onClick={() => handleBulkStatusChange('COMPLETED')}>
+                <MenuItem onClick={() => handleStatusChange("COMPLETED")}>
                     <Box sx={{
                         bgcolor: '#f0f0f0',
                         px: 1,
